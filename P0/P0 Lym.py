@@ -102,6 +102,11 @@ for l in lines[1:-1]: # Se salta la primera linea y última linea del archivo
 
         elif l.startswith("PROC"):
             indexProc = lines.index(l) # se obtiene el indice de la linea PROC
+            # se continua con el programa hasta encontrar una linea que inicie con CORP while
+            while lines[indexProc].startswith("CORP")==False: # se revisa si la linea inicia con CORP
+                indexProc+=1
+
+
             proc(l)
     
 
