@@ -214,18 +214,6 @@ for l in lines[1:-1]:  # Se salta la primera linea y última linea del archivo
 # Revisa la última liena del programa
 if lines[-1] != "GORP":
     abort()
+
+
 # %%
-variable = "drop(c)free (b);walk (n)"
-print(variable[0:4])
-lista = ["a","b","c"]
-if "D" not in lista:
-    print("Hola")
-nooo = "drop (c)"
-var = nooo.split("(")
-if len(var[1].split(",")) >1:
-    abort()
-else:
-    print("SIIII")
-def abort():
-    print("NO")
-    sys.exit()  # se sale del programa
