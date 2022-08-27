@@ -1,3 +1,4 @@
+"""Notas Proyecto 0"""
 #P0 Lym
 
 
@@ -57,64 +58,59 @@
 # You must verify that used function names and variable names have been previously defined or in the case of functions, that they are the function’s arguments.
 # allow recursion
 
-# archivo= open("texto.txt", 'r')
+"""PROGRAMA"""
+
+import sys # se importa sys para poder usar sys.exit()
+
+variables = [] # se generan variables globales para poder usarlas en todo el programa
 
 
-from curses.ascii import isspace
-import sys
-
-variables = []
-
-
-with open("texto.txt", 'r') as f:
-        lines = f.readlines()
+with open("texto.txt", 'r') as f: # se abre el archivo con el nombre texto.txt
+        lines = f.readlines() # se lee el archivo y se guarda en una lista
         print(lines)
 
+"""DEFINICIONES SECUNDARIAS"""
 def proc(linea):
-
     pass
 
 def var(linea):
-    linea.delete("VAR")
-    if linea[-1]!=";":
+    linea.delete("VAR") # se elimina el comando VAR
+    if linea[-1]!=";": # si el ultimo caracter no es un punto y coma
         print("NO")
-        sys.exit()
-    varia=linea.split(",")
-    if linea.count(",") != len(varia)-1:
+        sys.exit() # se sale del programa
+    varia=linea.split(",") # se separa la linea por comas
+    if linea.count(",") != len(varia)-1: # si hay mas comas que variables
         print("NO")
-        sys.exit() 
+        sys.exit()  # se sale del programa
     return varia
+def conditional():
+    pass
 
-
-
-
+"""PROGRAMA PRINCIPAL"""
 
 #Revisa primera linea de programa
-if lines[0]!="PROG\n":
+if lines[0]!="PROG\n": # si la primera linea no es PROG se termina el programa
     print(lines[0])
     print("NO")
     sys.exit()
 
-for l in lines[1:-1]:
+for l in lines[1:-1]: # Se salta la primera linea y última linea del archivo
 
-    if str(l).isspace()==False :
-        if l.startswith("VAR"):
-           variables= var(l)
+    if str(l).isspace()==False : # si la linea no es un espacio se revisa si es una declaración de variables
+        if l.startswith("VAR"): # si la linea inicia con VAR se revisa si es una declaración de variables
+           variables= var(l) # se guardan las variables en una lista
+
+        elif l.startswith("PROC"):
+            indexProc = lines.index(l) # se obtiene el indice de la linea PROC
+            proc(l)
     
 
         
 
 
 
-#Revisa ultima liena del programa
+#Revisa la última liena del programa
 if lines[-1]!="GORP":
     print(lines[-1])
     print("NO\n")
     sys.exit()
-
-
-
-# for line in archivo:
-#     print(line)
-
-
