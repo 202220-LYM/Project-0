@@ -63,67 +63,39 @@
 import sys  # se importa sys para poder usar sys.exit()
 
 variables_globales = []  # se generan variables globales para poder usarlas en todo el programa
-lista_PROC = []
+dic_PROC = {}
 
 
-def jump(linea):
+def caso1(linea): #n
     var = linea.split("(")
+    if len(var[1].split(",")) >1:
+        abort()
 
-
-def jumpto(linea):
+def caso2(linea):
     var = linea.split("(")
-
-
-def verr(linea):
-    pass
-
-
-def look(linea):
-    pass
-
-
-def drop(linea):
-    pass
-
-
-def get(linea):
-    pass
-
-
-def grab(linea):
-    pass
-
-
-def free(linea):
-    pass
-
-
-def pop(linea):
-    pass
-
+    if len(var[1].split(",")) > 2:
+        abort()
 
 def walk(linea):
     pass
 
 
-with open("texto.txt", 'r') as f:  # se abre el archivo con el nombre texto.txt
-    lines = f.readlines()  # se lee el archivo y se guarda en una lista
-    print(lines)
-
 """DEFINICIONES SECUNDARIAS"""
 
 
-def proc(linea):
+def primeralproc(linea):
     variables_locales = []
-
     proc = linea.replace(" ", "").remove("PROC").split("(")  # lista separada PROC y resto de (nota!!!!!!: CASO PROC CB)
-    if len(proc)== 1 or linea.endswith(")")== False:
-        print("NO")
-        sys.exit()
 
-    lista_PROC[proc(0)] = len(proc(1).split(","))  # se extrae el nombre de la función y se mete por si se utiliza luego
+    if len(proc) == 1 or linea.endswith(")") == False:  # Se comprueba que los prámetros se encuentren dentro del paréntesis
+        abort()
 
-    for x in proc(1).remove(")").split(","): # NOTA!!!: Hace falta revisar el caso de las comas
+    dic_PROC[proc(0)] = len(proc(1).split(","))  # se extrae el nombre de la función y se mete por si se utiliza luego
+
+    if len(proc(1).remove(")").split(",")) - 1 != proc.count(","):
+        abort()
+
+    for x in proc(1).remove(")").split(","):  # NOTA!!!: Hace falta revisar el caso de las comas (,)
         variables_locales.append(x)
 
     indexProc, indexCorp = lines.index(l), lines.index(l)  # se obtiene el indice de la linea PROC
@@ -133,15 +105,79 @@ def proc(linea):
         indexCorp += 1
 
 
+def metodo_if(linea):
+    pass
+
+
+def metodo_while(lineaa):
+    pass
+
+
+def metodo_repeat(lnea):
+    pass
+
+
+def proc(bloque):
+    primeralproc(bloque[0])
+    listasin = bloque.pop(0)
+
+    nombre_proc = bloque[0].remove("PROC").split("(")[0]
+
+    string_bloque = ""
+    for i in listasin:
+        string_bloque += i
+    string_bloque.replace(" ", "")
+    if string_bloque.startswith("{") == False or string_bloque.endswith("}"):
+        abort()
+    stringLista = string_bloque.strip("{}").split(";")
+    for j in stringLista:
+        if j.startswith("walk"):
+            walk(j) #ÚLTIMO NO COMENZAR CON WALK!!!!!!!
+        elif j.startswith("jump"):
+            caso1(j)
+        elif j.startswith("jumpTo"):
+            caso2(j)
+        elif j.startswith("veer"):
+            caso1(j)
+        elif j.startswith("look"):
+            caso1(j)
+        elif j.startswith("drop"):
+            caso1(j)
+        elif j.startswith("grab"):
+            caso1(j)
+        elif j.startswith("get"):
+            caso1(j)
+        elif j.startswith("free"):
+            caso1(j)
+        elif j.startswith("pop"):
+            caso1(j)
+        elif j.startswith("if"):
+            metodo_if(j)
+        elif j.startswith("while"):
+            metodo_while(j)
+        elif j.startswith("repeatTimes"):
+            metodo_repeat(j)
+        elif j.startswith(nombre_proc) == False:
+
+            dummy = False
+            for v in variables_globales:
+                if j.startswith(v):
+                    dummy== True
+
+            if dummy== False:
+                abort()
+            else:
+                var1=j.split(":=")
+                if len(var1) ==1 or var1[1].isnumeric()== False:
+                    abort()
 def var(linea):
+    ### REVISAR QUE SEA ALFANUMÉRICO
     linea.delete("VAR")  # se elimina el comando VAR
     if linea[-1] != ";":  # si el ultimo caracter no es un punto y coma
-        print("NO")
-        sys.exit()  # se sale del programa
+        abort()
     varia = linea.split(",")  # se separa la linea por comas
     if linea.count(",") != len(varia) - 1:  # si hay mas comas que variables
-        print("NO")
-        sys.exit()  # se sale del programa
+        abort()
     return varia
 
 
@@ -149,13 +185,22 @@ def conditions():
     pass
 
 
+def abort():
+    print("NO")
+    sys.exit()  # se sale del programa
+
+
+##############################################
 """PROGRAMA PRINCIPAL"""
+##############################################
+
+with open("texto.txt", 'r') as f:  # se abre el archivo con el nombre texto.txt
+    lines = f.readlines()  # se lee el archivo y se guarda en una lista
+    print(lines)
 
 # Revisa primera linea de programa
 if lines[0] != "PROG\n":  # si la primera linea no es PROG se termina el programa
-    print(lines[0])
-    print("NO")
-    sys.exit()
+    abort()
 
 for l in lines[1:-1]:  # Se salta la primera linea y última linea del archivo
     """PARTE A: VAR"""
@@ -168,6 +213,19 @@ for l in lines[1:-1]:  # Se salta la primera linea y última linea del archivo
 
 # Revisa la última liena del programa
 if lines[-1] != "GORP":
-    print(lines[-1])
-    print("NO\n")
-    sys.exit()
+    abort()
+# %%
+variable = "drop(c)free (b);walk (n)"
+print(variable[0:4])
+lista = ["a","b","c"]
+if "D" not in lista:
+    print("Hola")
+nooo = "drop (c)"
+var = nooo.split("(")
+if len(var[1].split(",")) >1:
+    abort()
+else:
+    print("SIIII")
+def abort():
+    print("NO")
+    sys.exit()  # se sale del programa
