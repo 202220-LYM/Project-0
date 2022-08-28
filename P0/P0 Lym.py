@@ -78,7 +78,7 @@ def caso1(linea, variables):  # n
     par = var[1].strip(")")  # Se quita el caracter ) de la linea
     if len(var[1].split(",")) > 1:  # Si la longitud de la lista es mayor a 1
         abort()
-    elif par.isnumeric() == False:  # no es un número se verifica que es variable o parámetro
+    elif par.isnumeric() is False:  # no es un número se verifica que es variable o parámetro
         isVar(variables, par)  # Si no aborta el proceso continúa
 
 
