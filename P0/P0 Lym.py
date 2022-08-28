@@ -66,7 +66,8 @@ variables_globales = []  # se generan variables globales para poder usarlas en t
 dic_PROC = {}
 direcciones = ["left", "right", "around"]
 orientaciones = ["north", "south", "east", "west"]
-ins= ["walk","jump","grab","pop","pick","free","drop"]
+ins = ["walk", "jump", "grab", "pop", "pick", "free", "drop"]
+
 
 def caso1(linea, variables):  # n
     var = linea.split("(")
@@ -101,9 +102,6 @@ def caso3(linea):
         is_orie(par)
 
 
-
-
-
 def is_dir(linea):
     if linea in direcciones == False:
         abort()
@@ -127,7 +125,8 @@ def primeralproc(linea):
     variables_locales = []
     proc = linea.replace(" ", "").remove("PROC").split("(")  # lista separada PROC y resto de (nota!!!!!!: CASO PROC CB)
 
-    if len(proc) == 1 or linea.endswith(")") == False:  # Se comprueba que los prámetros se encuentren dentro del paréntesis
+    if len(proc) == 1 or linea.endswith(
+            ")") == False:  # Se comprueba que los prámetros se encuentren dentro del paréntesis
         abort()
     dic_PROC[proc(0)] = len(proc(1).split(","))  # se extrae el nombre de la función y se mete por si se utiliza luego
 
@@ -148,6 +147,23 @@ def primeralproc(linea):
 """
 
 
+def ifNormal(lineac, variables_loc, nombre_proc):
+    vara = lineac.split("{")
+    if len(vara) < 2:
+        abort()
+    else:
+        if vara[0].startswith("(") == False or vara[0].startswith("(") == False:
+            abort()
+        else:
+            cond = vara[0].removesuffix(")").removeprefix("(")
+            condicion(cond)
+        if vara[1].endswith("}") == False:
+            abort()
+        else:
+            coman = vara[1].strip("}").split(";")
+            comando(variables_loc, coman, nombre_proc)
+
+
 def metodo_if(linea, variables_loc, nombre_proc):
     lineac = linea.removeprefix("if").removesuffix("fi")
     if linea.endswith("fi") == False:
@@ -157,20 +173,17 @@ def metodo_if(linea, variables_loc, nombre_proc):
     elif "else" in lineac:
         elseDef(lineac)
     else:
-        vara = lineac.split("{")
-        if len(vara) < 2:
-            abort()
-        else:
-            if vara[0].startswith("(") == False or vara[0].startswith("(") == False:
-                abort()
-            else:
-                cond = vara[0].removesuffix(")").removeprefix("(")
-                condicion(cond)
-            if vara[1].endswith("}") == False:
-                abort()
-            else:
-                coman = [vara[1].strip("}")]
-                comando(variables_loc, coman, nombre_proc)
+        ifNormal(lineac, variables_loc, nombre_proc)
+
+
+def elseDef(linea, variables_loc, nombre_proc):  # (else {})
+    vari = linea.split("else")
+    ifNormal(vari[0], variables_loc, nombre_proc)
+    if vari[1].startswith("{") == False or vari[1].startswith("}") == False:
+        abort()
+    else:
+        limp = vari[1].removesuffix("}").removeprefix("{").split(";")
+        comando(variables_loc, limp, nombre_proc)
 
 
 def comando(variables_loc, stringLista, nombre_proc):
@@ -197,9 +210,9 @@ def comando(variables_loc, stringLista, nombre_proc):
             elif j.startswith("pop"):
                 caso1(j, variables_loc)
             elif j.startswith("if"):
-                metodo_if(j, variables_loc)
+                metodo_if(j, variables_loc, nombre_proc)
             elif j.startswith("while"):
-                metodo_while(j, variables_loc)
+                metodo_while(j, variables_loc, nombre_proc)
             elif j.startswith("repeatTimes"):
                 metodo_repeat(j, variables_loc)
             elif j.startswith(nombre_proc) == False:
@@ -233,7 +246,8 @@ def condicion(linea):
             eso = linea.remove("not").removesuffix(")").removeprefix("(")
             condicion(eso)
 
-def facing(lin): # Solo tiene 1 var
+
+def facing(lin):  # Solo tiene 1 var
     if "(" in lin and ")" in lin:
         var = lin.split("(")
         par = var[1].strip(")")
@@ -243,6 +257,8 @@ def facing(lin): # Solo tiene 1 var
             is_orie(par)
     else:
         abort()
+
+
 def walk(linea, lista):
     var = linea.split("(")
     par = var[1].strip(")").split(",")
@@ -258,6 +274,7 @@ def walk(linea, lista):
     elif len(var[1].split(",")) > 2:
         abort()
 
+
 def valido(linea, lista):
     if "(" in linea and ")" in linea:
         var = linea.split("(")
@@ -272,17 +289,30 @@ def valido(linea, lista):
     else:
         abort()
 
-def elseDef(linea):
-    pass
+
+def metodo_while(linea, variables_loc, nombre_proc):
+    varb = linea.removeprefix("while").removesuffix("od")
+    # while ( canWalk ( north ,1) ) do { walk ( north ,1) } od
+    # [( canWalk ( north ,1) ), walk ( north ,1)]
+    if linea.endswith("od") == False or "do" not in varb:
+        abort()
+    else:
+        varn = varb.split("do")
+        condicion(varn[0])
+        comando(variables_loc,var[1].strip("{}".split(";")),nombre_proc)
 
 
-def metodo_while(lineaa):
-    pass
-
-
-def metodo_repeat(lnea):
-    pass
-
+def metodo_repeat(lon, variables_loc,nombre_proc):
+    if lon.endswith("per") == False:
+        abort()
+    else:
+        perry = lon.removeprefix("repeatTimes").removesuffix("per").split("{")
+        if len(perry) <2:
+            abort()
+        else:
+            if perry[0].isnumeric()== False:
+                isVar(perry[0])
+            comando(variables_loc,perry[1].strip("}"),nombre_proc)
 
 def proc(bloque):
     variables_loc = primeralproc(bloque[0])
@@ -302,7 +332,7 @@ def proc(bloque):
 
 def var(linea):
     ### REVISAR QUE SEA ALFANUMÉRICO
-    linea.delete("VAR")  # se elimina el comando VAR
+    linea.replace(" ","").delete("VAR")  # se elimina el comando VAR
     if linea[-1] != ";":  # si el ultimo caracter no es un punto y coma
         abort()
     varia = linea.split(",")  # se separa la linea por comas
