@@ -8,8 +8,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7d5b3c9d-4178-44eb-9631-3228c951b85c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/codestream.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/codestream.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/P0/P0 Lym.py" beforeDir="false" afterPath="$PROJECT_DIR$/P0/P0 Lym.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -102,7 +100,7 @@
       <workItem from="1661626777001" duration="12045000" />
       <workItem from="1661644821218" duration="239000" />
       <workItem from="1661645106868" duration="10252000" />
-      <workItem from="1661722854851" duration="921000" />
+      <workItem from="1661722854851" duration="1340000" />
     </task>
     <servers />
   </component>

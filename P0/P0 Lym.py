@@ -107,19 +107,19 @@ def caso3(linea):
 
 
 def is_dir(linea):
-    if linea in direcciones == False:
+    if linea in direcciones is False:
         abort()
 
 
 def is_orie(linea):
-    if linea in orientaciones == False:
+    if linea in orientaciones is False:
         abort()
 
 
 def isVar(lista, var):
-    if lista != None:
-        if var in lista == False:
-            if var in variables_globales == False:
+    if lista is not None:
+        if var in lista is False:
+            if var in variables_globales is False:
                 abort()
 
 
@@ -156,8 +156,6 @@ def metodo_if(linea, variables_loc):
     lineac = linea.removeprefix("if").removesuffix("fi")
     if not linea.endswith("fi"):
         abort()
-    # ( canWalk ( west ,1) ) { walk ( west ,1) }
-    # ["canWalk ( west ,1)", "walk ( west ,1) }"]
     elif "else" in lineac:
         elseDef(lineac)
     else:
@@ -391,7 +389,7 @@ def alphaNum(lista):
 
 with open("texto.txt", 'r') as f:  # se abre el archivo con el nombre texto.txt
     lines = f.readlines()  # se lee el archivo y se guarda en una lista
-
+    print(lines)
 string_bloque = ""
 for i in lines:
     string_bloque += i
@@ -403,7 +401,7 @@ if string_bloque.count("{") % 2 > 0 or string_bloque.count("}") % 2 > 0 or strin
     if string_bloque.startswith("PROG") and string_bloque.endswith(
             "GORP"):  # si la primera linea no es PROG se termina el programa
         i = 1
-        while lines[i]>0 and i < len(lines[1:-1]):  # Se salta la primera linea y última linea del archivo
+        while lines[i] > 0 and i < len(lines[1:-1]):  # Se salta la primera linea y última linea del archivo
             """PARTE A: VAR"""
             l = lines[i]
             if str(l).isspace() == False:  # si la linea no es un espacio se revisa si es una declaración de variables
@@ -446,4 +444,3 @@ if string_bloque.count("{") % 2 > 0 or string_bloque.count("}") % 2 > 0 or strin
             i += 1
     else:
         abort()
-
