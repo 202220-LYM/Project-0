@@ -64,20 +64,60 @@ import sys  # se importa sys para poder usar sys.exit()
 
 variables_globales = []  # se generan variables globales para poder usarlas en todo el programa
 dic_PROC = {}
+direcciones = ["left", "right", "around"]
+orientaciones = ["north", "south", "east", "west"]
+ins= ["walk","jump","grab","pop","pick","free","drop"]
 
-
-def caso1(linea): #n
+def caso1(linea, variables):  # n
     var = linea.split("(")
-    if len(var[1].split(",")) >1:
+    par = var[1].strip(")")
+    if len(var[1].split(",")) > 1:
         abort()
+    elif par.isnumeric() == False:  # no es un número se verifica que es variable
+        isVar(variables, par)  # Si no aborta el proceso continúa
 
-def caso2(linea):
+
+def caso2(linea, lista):
     var = linea.split("(")
+    # jump(a,b) var=["jump",["a","b"]]
+    paras = var[1].strip(")").split(",")
     if len(var[1].split(",")) > 2:
         abort()
+    else:
+        for p in paras:
+            isVar(lista, p)
 
-def walk(linea):
-    pass
+
+def caso3(linea):
+    var = linea.split("(")
+    par = var[1].strip(")")
+    if len(var[1].split(",")) > 1:
+        abort()
+    elif par.isnumeric():
+        abort()
+    elif var[0] == "veer":
+        is_dir(par)
+    elif var[0] == "look":
+        is_orie(par)
+
+
+
+
+
+def is_dir(linea):
+    if linea in direcciones == False:
+        abort()
+
+
+def is_orie(linea):
+    if linea in orientaciones == False:
+        abort()
+
+
+def isVar(lista, var):
+    if var in lista == False:
+        if var in variables_globales == False:
+            abort()
 
 
 """DEFINICIONES SECUNDARIAS"""
@@ -89,7 +129,6 @@ def primeralproc(linea):
 
     if len(proc) == 1 or linea.endswith(")") == False:  # Se comprueba que los prámetros se encuentren dentro del paréntesis
         abort()
-
     dic_PROC[proc(0)] = len(proc(1).split(","))  # se extrae el nombre de la función y se mete por si se utiliza luego
 
     if len(proc(1).remove(")").split(",")) - 1 != proc.count(","):
@@ -97,15 +136,143 @@ def primeralproc(linea):
 
     for x in proc(1).remove(")").split(","):  # NOTA!!!: Hace falta revisar el caso de las comas (,)
         variables_locales.append(x)
+    return variables_locales
 
+
+"""
     indexProc, indexCorp = lines.index(l), lines.index(l)  # se obtiene el indice de la linea PROC
     # se continua con el programa hasta encontrar una linea que inicie con CORP while
     proc(l)
     while lines[indexCorp] != "CORP":
         indexCorp += 1
+"""
 
 
-def metodo_if(linea):
+def metodo_if(linea, variables_loc, nombre_proc):
+    lineac = linea.removeprefix("if").removesuffix("fi")
+    if linea.endswith("fi") == False:
+        abort()
+    # ( canWalk ( west ,1) ) { walk ( west ,1) }
+    # ["canWalk ( west ,1)", "walk ( west ,1) }"]
+    elif "else" in lineac:
+        elseDef(lineac)
+    else:
+        vara = lineac.split("{")
+        if len(vara) < 2:
+            abort()
+        else:
+            if vara[0].startswith("(") == False or vara[0].startswith("(") == False:
+                abort()
+            else:
+                cond = vara[0].removesuffix(")").removeprefix("(")
+                condicion(cond)
+            if vara[1].endswith("}") == False:
+                abort()
+            else:
+                coman = [vara[1].strip("}")]
+                comando(variables_loc, coman, nombre_proc)
+
+
+def comando(variables_loc, stringLista, nombre_proc):
+    if "(" in stringLista and ")" in stringLista:
+        for j in stringLista:
+            if j.startswith("walk"):
+                walk(j, variables_loc)  # ÚLTIMO NO COMENZAR CON WALK!!!!!!!
+            elif j.startswith("jump"):
+                caso1(j, variables_loc)
+            elif j.startswith("jumpTo"):
+                caso2(j, variables_loc)
+            elif j.startswith("veer"):
+                caso3(j)
+            elif j.startswith("look"):
+                caso3(j)
+            elif j.startswith("drop"):
+                caso1(j, variables_loc)
+            elif j.startswith("grab"):
+                caso1(j, variables_loc)
+            elif j.startswith("get"):
+                caso1(j, variables_loc)
+            elif j.startswith("free"):
+                caso1(j, variables_loc)
+            elif j.startswith("pop"):
+                caso1(j, variables_loc)
+            elif j.startswith("if"):
+                metodo_if(j, variables_loc)
+            elif j.startswith("while"):
+                metodo_while(j, variables_loc)
+            elif j.startswith("repeatTimes"):
+                metodo_repeat(j, variables_loc)
+            elif j.startswith(nombre_proc) == False:
+
+                dummy = False
+                for v in variables_globales:
+                    if j.startswith(v):
+                        dummy == True
+
+                if dummy == False:
+                    abort()
+                else:
+                    var1 = j.split(":=")
+                    if len(var1) == 1 or var1[1].isnumeric() == False:
+                        abort()
+    else:
+        abort()
+
+
+def condicion(linea):
+    if linea.startswith("isfacing"):
+        facing(linea)
+    elif linea.startswith("isValid"):
+        valido(linea)
+    elif linea.startswith("canWalk"):
+        walk(linea)
+    elif linea.startswith("not"):
+        if len(linea.split("(")) < 2 or linea.endswith(")") == False:
+            abort()
+        else:
+            eso = linea.remove("not").removesuffix(")").removeprefix("(")
+            condicion(eso)
+
+def facing(lin): # Solo tiene 1 var
+    if "(" in lin and ")" in lin:
+        var = lin.split("(")
+        par = var[1].strip(")")
+        if len(var[1].split(",")) > 1:
+            abort()
+        else:
+            is_orie(par)
+    else:
+        abort()
+def walk(linea, lista):
+    var = linea.split("(")
+    par = var[1].strip(")").split(",")
+    if len(var[1].split(",")) == 1:
+        caso1(linea, lista)
+    elif len(var[1].split(",")) == 2:
+        # ["walk",["d/o",n"]]
+        if par[0] not in direcciones:
+            if par[0] not in orientaciones:
+                abort()
+        elif par[1].isnumeric() == False:  # no es un número se verifica que es variable
+            isVar(lista, par)
+    elif len(var[1].split(",")) > 2:
+        abort()
+
+def valido(linea, lista):
+    if "(" in linea and ")" in linea:
+        var = linea.split("(")
+        paras = var[1].strip(")").split(",")
+        if len(var[1].split(",")) > 2:
+            abort()
+        else:
+            if paras[0] not in ins:
+                abort()
+            elif paras[1].isnumeric() == False:  # no es un número se verifica que es variable (nombre o variable)
+                isVar(lista, paras)
+    else:
+        abort()
+
+def elseDef(linea):
     pass
 
 
@@ -118,7 +285,7 @@ def metodo_repeat(lnea):
 
 
 def proc(bloque):
-    primeralproc(bloque[0])
+    variables_loc = primeralproc(bloque[0])
     listasin = bloque.pop(0)
 
     nombre_proc = bloque[0].remove("PROC").split("(")[0]
@@ -130,46 +297,9 @@ def proc(bloque):
     if string_bloque.startswith("{") == False or string_bloque.endswith("}"):
         abort()
     stringLista = string_bloque.strip("{}").split(";")
-    for j in stringLista:
-        if j.startswith("walk"):
-            walk(j) #ÚLTIMO NO COMENZAR CON WALK!!!!!!!
-        elif j.startswith("jump"):
-            caso1(j)
-        elif j.startswith("jumpTo"):
-            caso2(j)
-        elif j.startswith("veer"):
-            caso1(j)
-        elif j.startswith("look"):
-            caso1(j)
-        elif j.startswith("drop"):
-            caso1(j)
-        elif j.startswith("grab"):
-            caso1(j)
-        elif j.startswith("get"):
-            caso1(j)
-        elif j.startswith("free"):
-            caso1(j)
-        elif j.startswith("pop"):
-            caso1(j)
-        elif j.startswith("if"):
-            metodo_if(j)
-        elif j.startswith("while"):
-            metodo_while(j)
-        elif j.startswith("repeatTimes"):
-            metodo_repeat(j)
-        elif j.startswith(nombre_proc) == False:
+    comando(variables_loc, stringLista, nombre_proc)
 
-            dummy = False
-            for v in variables_globales:
-                if j.startswith(v):
-                    dummy== True
 
-            if dummy== False:
-                abort()
-            else:
-                var1=j.split(":=")
-                if len(var1) ==1 or var1[1].isnumeric()== False:
-                    abort()
 def var(linea):
     ### REVISAR QUE SEA ALFANUMÉRICO
     linea.delete("VAR")  # se elimina el comando VAR
@@ -196,7 +326,6 @@ def abort():
 
 with open("texto.txt", 'r') as f:  # se abre el archivo con el nombre texto.txt
     lines = f.readlines()  # se lee el archivo y se guarda en una lista
-    print(lines)
 
 # Revisa primera linea de programa
 if lines[0] != "PROG\n":  # si la primera linea no es PROG se termina el programa
@@ -215,5 +344,7 @@ for l in lines[1:-1]:  # Se salta la primera linea y última linea del archivo
 if lines[-1] != "GORP":
     abort()
 
-
 # %%
+a = "if123aaafi"
+
+print(a.removeprefix("if").removesuffix("fi"))

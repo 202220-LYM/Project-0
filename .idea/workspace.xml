@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7d5b3c9d-4178-44eb-9631-3228c951b85c" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/codestream.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/codestream.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/P0/P0 Lym.py" beforeDir="false" afterPath="$PROJECT_DIR$/P0/P0 Lym.py" afterDir="false" />
     </list>
@@ -31,6 +32,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
     "dart.analysis.tool.window.visible": "false",
+    "full.screen.before.presentation.mode": "false",
     "last_opened_file_path": "C:/Users/cgome/Documents/GitHub/Project-0/P0/P0 Lym.py",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -93,7 +95,9 @@
       <option name="presentableId" value="Default" />
       <updated>1661565409362</updated>
       <workItem from="1661565416041" duration="4950000" />
-      <workItem from="1661626777001" duration="11746000" />
+      <workItem from="1661626777001" duration="12045000" />
+      <workItem from="1661644821218" duration="239000" />
+      <workItem from="1661645106868" duration="7935000" />
     </task>
     <servers />
   </component>
