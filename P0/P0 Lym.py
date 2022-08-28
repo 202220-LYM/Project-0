@@ -60,6 +60,10 @@
 
 """PROGRAMA"""
 
+from ast import Break
+from asyncio.windows_events import NULL
+from curses.ascii import isalnum
+from pickle import FALSE
 import sys  # se importa sys para poder usar sys.exit()
 
 variables_globales = []  # se generan variables globales para poder usarlas en todo el programa
@@ -67,7 +71,11 @@ dic_PROC = {}
 direcciones = ["left", "right", "around"]
 orientaciones = ["north", "south", "east", "west"]
 ins = ["walk", "jump", "grab", "pop", "pick", "free", "drop"]
+comandos =["walk","jump", "jumpTo","veer", "look", "drop", "grab", "get","free", "pop"]
 
+def abort():
+    print("NO")
+    sys.exit()
 
 def caso1(linea, variables):  # n
     var = linea.split("(")
@@ -113,9 +121,10 @@ def is_orie(linea):
 
 
 def isVar(lista, var):
-    if var in lista == False:
-        if var in variables_globales == False:
-            abort()
+    if lista != None:
+        if var in lista == False:
+            if var in variables_globales == False:
+                abort()
 
 
 """DEFINICIONES SECUNDARIAS"""
@@ -151,7 +160,7 @@ def primeralproc(linea):
 """Estructuras de control"""
 
 #Maneja condicionales de if
-def metodo_if(linea, variables_loc, nombre_proc):
+def metodo_if(linea, variables_loc):
     lineac = linea.removeprefix("if").removesuffix("fi")
     if linea.endswith("fi") == False:
         abort()
@@ -160,10 +169,10 @@ def metodo_if(linea, variables_loc, nombre_proc):
     elif "else" in lineac:
         elseDef(lineac)
     else:
-        ifNormal(lineac, variables_loc, nombre_proc)
+        ifNormal(lineac, variables_loc)
 
 #Maneja if sencillo (una condicion y un bloque)
-def ifNormal(lineac, variables_loc, nombre_proc):
+def ifNormal(lineac, variables_loc):
     vara = lineac.split("{")
     if len(vara) < 2:
         abort()
@@ -177,20 +186,20 @@ def ifNormal(lineac, variables_loc, nombre_proc):
             abort()
         else:
             coman = vara[1].strip("}").split(";")
-            comando(variables_loc, coman, nombre_proc)
+            comando(variables_loc, coman)
 
 #Maneja if en caso de haber un else
-def elseDef(linea, variables_loc, nombre_proc):  # (else {})
+def elseDef(linea, variables_loc):  # (else {})
     vari = linea.split("else")
-    ifNormal(vari[0], variables_loc, nombre_proc)
+    ifNormal(vari[0], variables_loc)
     if vari[1].startswith("{") == False or vari[1].startswith("}") == False:
         abort()
     else:
         limp = vari[1].removesuffix("}").removeprefix("{").split(";")
-        comando(variables_loc, limp, nombre_proc)
+        comando(variables_loc, limp)
 
 # Maneja while
-def metodo_while(linea, variables_loc, nombre_proc):
+def metodo_while(linea, variables_loc):
     varb = linea.removeprefix("while").removesuffix("od")
     # while ( canWalk ( north ,1) ) do { walk ( north ,1) } od
     # [( canWalk ( north ,1) ), walk ( north ,1)]
@@ -199,10 +208,10 @@ def metodo_while(linea, variables_loc, nombre_proc):
     else:
         varn = varb.split("do")
         condicion(varn[0])
-        comando(variables_loc,var[1].strip("{}".split(";")),nombre_proc)
+        comando(variables_loc,varn[1].strip("{}".split(";")))
 
 #Maneja repeat
-def metodo_repeat(lon, variables_loc,nombre_proc):
+def metodo_repeat(lon, variables_loc):
     if lon.endswith("per") == False:
         abort()
     else:
@@ -212,7 +221,7 @@ def metodo_repeat(lon, variables_loc,nombre_proc):
         else:
             if perry[0].isnumeric()== False:
                 isVar(perry[0])
-            comando(variables_loc,perry[1].strip("}"),nombre_proc)
+            comando(variables_loc,perry[1].strip("}"))
 
 """Condicionales"""
 def condicion(linea):
@@ -241,53 +250,76 @@ def facing(lin):  # Solo tiene 1 var
         abort()
 
 """Comandos"""
-def comando(variables_loc, stringLista, nombre_proc):
-    if "(" in stringLista and ")" in stringLista:
-        for j in stringLista:
+def comando(variables_loc, stringLista):
+    for j in stringLista:
+        if "(" in stringLista and ")" in stringLista:
+            proc= j.split("(")
             if j.startswith("walk"):
-                walk(j, variables_loc)  # ÚLTIMO NO COMENZAR CON WALK!!!!!!!
-            elif j.startswith("jump"):
-                caso1(j, variables_loc)
+                walk(j, None) 
+            elif j.startswith("jump") or j.startswith("drop") or j.startswith("grab") or j.startswith("get") or j.startswith("free") or caso1(j, None):
+                caso1(j, None)
             elif j.startswith("jumpTo"):
-                caso2(j, variables_loc)
-            elif j.startswith("veer"):
+                caso2(j, None)
+            elif j.startswith("veer")or j.startswith("look"):
                 caso3(j)
-            elif j.startswith("look"):
-                caso3(j)
-            elif j.startswith("drop"):
-                caso1(j, variables_loc)
-            elif j.startswith("grab"):
-                caso1(j, variables_loc)
-            elif j.startswith("get"):
-                caso1(j, variables_loc)
-            elif j.startswith("free"):
-                caso1(j, variables_loc)
-            elif j.startswith("pop"):
-                caso1(j, variables_loc)
             elif j.startswith("if"):
-                metodo_if(j, variables_loc, nombre_proc)
+                metodo_if(j, variables_loc)
             elif j.startswith("while"):
-                metodo_while(j, variables_loc, nombre_proc)
+                metodo_while(j, variables_loc)
             elif j.startswith("repeatTimes"):
                 metodo_repeat(j, variables_loc)
-            elif j.startswith(nombre_proc) == False:
-
-                dummy = False
-                for v in variables_globales:
-                    if j.startswith(v):
-                        dummy == True
-
-                if dummy == False:
+            elif proc[0] in dic_PROC.keys():
+                dicProc(j.removeprefix(proc[0]), proc[0])
+        else:
+            #revisar si es una asignacion
+            dummy = False
+            for v in variables_globales:
+                if j.startswith(v):
+                    dummy == True
+            if dummy == False:
+                abort()
+            else:
+                var1 = j.split(":=")
+                if len(var1) == 1 or var1[1].isnumeric() == False:
                     abort()
-                else:
-                    var1 = j.split(":=")
-                    if len(var1) == 1 or var1[1].isnumeric() == False:
-                        abort()
-    else:
+
+
+def dicProc(lin, nom):
+    num = dic_PROC[nom]
+    if len(lin.split(","))!= num:
         abort()
+    else:
+        lini=lin.removeprefix("(").removesuffix(")").split(",")
+        for l in lini:
+            if l.isnumeric()==FALSE:
+                abort()
+    
+
+
+# def comando(j):
+#     if "(" in j and ")" in j:
+#         if j.startswith("walk"):
+#             walk(j, None) 
+#         elif j.startswith("jump") or j.startswith("drop") or j.startswith("grab") or j.startswith("get") or j.startswith("free") or caso1(j, None):
+#             caso1(j, None)
+#         elif j.startswith("jumpTo"):
+#             caso2(j, None)
+#         elif j.startswith("veer")or j.startswith("look"):
+#             caso3(j)
+#     else:
+#         abort()
+
+# def controlStructure(j):
+#     if j.startswith("if"):
+#         metodo_if(j, None, None)
+#     elif j.startswith("while"):
+#         metodo_while(j, None, None)
+#     elif j.startswith("repeatTimes"):
+#         metodo_repeat(j, None)
 
 
 def walk(linea, lista):
+
     var = linea.split("(")
     par = var[1].strip(")").split(",")
     if len(var[1].split(",")) == 1:
@@ -332,25 +364,45 @@ def proc(bloque):
     stringLista = string_bloque.strip("{}").split(";")
     comando(variables_loc, stringLista, nombre_proc)
 
+def bloque(bloq):
+    string_bloque = ""
+    for i in bloq:
+        string_bloque += i
+    string_bloque.replace(" ", "")
+    if string_bloque.startswith("{") == False or string_bloque.endswith("}"):
+        abort()
+    else:
+        stringLista = string_bloque.strip("{}").split(";")
+        if string_bloque.count(";")!=len(stringLista)-1:
+            abort()
+        else:
+            comando(None,stringLista)
 
+            #[go(3,3)],[n=6],[putCB (2 ,1)]
+
+        
+
+#ENTRA UN STRING
 def var(linea):
-    ### REVISAR QUE SEA ALFANUMÉRICO
-    linea.replace(" ","").delete("VAR")  # se elimina el comando VAR
-    if linea[-1] != ";":  # si el ultimo caracter no es un punto y coma
+    leni= linea.replace(" ","").removeprefix("VAR") 
+    #n, x, y; # se elimina el comando VAR
+    if leni.endswith(";") ==False:  # si el ultimo caracter no es un punto y coma
         abort()
-    varia = linea.split(",")  # se separa la linea por comas
-    if linea.count(",") != len(varia) - 1:  # si hay mas comas que variables
-        abort()
+    else:
+        varia = leni.removesufix(";").split(",")  # se separa la linea por comas
+        if leni.count(",") != len(varia) - 1:  # si hay mas comas que variables
+            abort()
+        else:
+            alphaNum(varia)
     return varia
 
+#revisa q sea alfanumerico
+def alphaNum(lista):
+    for f in lista:
+        if isalnum(f)==False or f[0].isalpha()==False:
+            abort()
 
-def conditions():
-    pass
-
-
-def abort():
-    print("NO")
-    sys.exit()  # se sale del programa
+  # se sale del programa
 
 
 ##############################################
@@ -360,24 +412,75 @@ def abort():
 with open("texto.txt", 'r') as f:  # se abre el archivo con el nombre texto.txt
     lines = f.readlines()  # se lee el archivo y se guarda en una lista
 
-# Revisa primera linea de programa
-if lines[0] != "PROG\n":  # si la primera linea no es PROG se termina el programa
-    abort()
+string_bloque = ""
+for i in lines:
+    string_bloque += i
+string_bloque.replace(" ", "")
 
-for l in lines[1:-1]:  # Se salta la primera linea y última linea del archivo
-    """PARTE A: VAR"""
-    if str(l).isspace() == False:  # si la linea no es un espacio se revisa si es una declaración de variables
-        if l.startswith("VAR"):  # si la linea inicia con VAR se revisa si es una declaración de variables
-            variables_globales.append(var(l))  # se guardan las variables en una lista
+if string_bloque.count("{")%2>0 or string_bloque.count("}")%2>0 or string_bloque.count("(")%2>0 or string_bloque.count(")")%2>0: 
+    # Revisa primera linea de programa
+    if string_bloque.startswith("PROG") and string_bloque.endswith("GORP"):  # si la primera linea no es PROG se termina el programa
+        i=1
+        while(lines[i]!=NULL and i<len(lines[1:-1])): # Se salta la primera linea y última linea del archivo
+            """PARTE A: VAR"""
+            l=lines[i]
+            if str(l).isspace() == False:  # si la linea no es un espacio se revisa si es una declaración de variables
+                if l.startswith("VAR"):  # si la linea inicia con VAR se revisa si es una declaración de variables
+                    variables_globales.append(var(l))  # se guardan las variables en una lista
+                elif l.startswith("PROC"):
+                    indexProc=i
+                    indexCorp = -1
+                    dummy=FALSE
+                    for i in lines[indexProc+1:-1]:
+                        if i.startswith("PROC"):
+                            break
+                        elif i.startswith("CORP"):
+                            dummy=True
+                            indexCorp= lines.index(i)
+                            break
+                    if dummy:
+                        proc(lines[indexProc:indexCorp+1])
+                    else:
+                        abort()
+                    i=indexCorp
+                elif l.startswith("{"):
+                    indexcorchi=lines.index(l)
+                    indexcorchf = -1
+                    dummy=FALSE
+                    for i in lines[indexcorchi+1:-1]:
+                        if i.startswith("{"):
+                            break
+                        elif i.startswith("}"):
+                            dummy=True
+                            indexcorchf= lines.index(i)
+                            break
+                    if dummy:
+                        bloque(lines[indexcorchi:indexcorchf+1])
+                    else:
+                        abort()
+                    i=indexcorchf
+                else:
+                    abort()
+            i+=1
+    else:
+        abort()
 
-        if l.startswith("PROC"):
-            proc_def = proc(l)
 
-# Revisa la última liena del programa
-if lines[-1] != "GORP":
-    abort()
+    # indexProc, indexCorp = lines.index(l), lines.index(l)  # se obtiene el indice de la linea PROC
+    # # se continua con el programa hasta encontrar una linea que inicie con CORP while
+    # proc(l)
+    # while lines[indexCorp] != "CORP":
+    #     indexCorp += 1
+# %%
+a = ["{hsdhoid}","(sdfh)jhjh", "kjhgj", "kffl"]
+
+for b in range(6):
+    print(b)
+    b=3
+
+
+
+
+
 
 # %%
-a = "if123aaafi"
-
-print(a.removeprefix("if").removesuffix("fi"))
