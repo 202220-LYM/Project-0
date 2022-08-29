@@ -59,8 +59,6 @@
 # allow recursion
 
 """PROGRAMA"""
-
-from ast import Break
 from asyncio.windows_events import NULL
 from curses.ascii import isalnum
 from pickle import FALSE
@@ -380,7 +378,6 @@ def bloque(bloq):
 
             #[go(3,3)],[n=6],[putCB (2 ,1)]
 
-        
 
 #ENTRA UN STRING
 def var(linea):
