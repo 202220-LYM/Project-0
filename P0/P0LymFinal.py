@@ -381,7 +381,7 @@ def alphaNum(lista):
 """PROGRAMA PRINCIPAL"""
 ##############################################
 
-with open("P0/prueba.txt", 'r') as f:  # se abre el archivo con el nombre texto.txt
+with open("prueba.txt", 'r') as f:  # se abre el archivo con el nombre texto.txt
     lines = f.readlines()  # se lee el archivo y se guarda en una lista
 
 string_bloque1 = ""
