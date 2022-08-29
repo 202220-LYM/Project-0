@@ -1,7 +1,6 @@
 """Notas Proyecto 0"""
 # P0 Lym
 
-
 # M: to move forward
 # R: to turn right
 # C: to drop a chip
@@ -19,7 +18,7 @@
 # A declaration of variables is the keyword VAR followed by a list of names separated by commas.
 # A name is a string of alphanumeric characters that begins with a letter
 # The list is followed by ;
-# A procedure defintion is a the word PROC followed by a name followed by a list of parameters within parenthesis separated by commas, 
+# A procedure defintion is a the word PROC followed by a name followed by a list of parameters within parenthesis separated by commas,
 #  followed by a block of instructions and ending with the word CORP.
 # A block of instructions is a sequence of instructions separated by semicolons within curly brackets.
 # An instruction can be a command,a control structure or a procedure call.
@@ -53,34 +52,32 @@
 # canWalk(o,n) – where D is one of: right, left, front, or back and n is a number, a variable or a parameter.
 # not (cond) – where cond is a condition
 
-# Implement a simple yes/no parser.
-# Verify whether the syntax is correct.
-# You must verify that used function names and variable names have been previously defined or in the case of functions, that they are the function’s arguments.
-# allow recursion
+# Implement a simple yes/no parser. Verify whether the syntax is correct. You must verify that used function names
+# and variable names have been previously defined or in the case of functions, that they are the function’s
+# arguments. allow recursion
 
 """PROGRAMA"""
-from asyncio.windows_events import NULL
-from curses.ascii import isalnum
-from pickle import FALSE
+
 import sys  # se importa sys para poder usar sys.exit()
+
+"""Definición de parámetros GLOBALES"""
 
 variables_globales = []  # se generan variables globales para poder usarlas en todo el programa
 dic_PROC = {}
 direcciones = ["left", "right", "around"]
 orientaciones = ["north", "south", "east", "west"]
 ins = ["walk", "jump", "grab", "pop", "pick", "free", "drop"]
-comandos =["walk","jump", "jumpTo","veer", "look", "drop", "grab", "get","free", "pop"]
+comandos = ["walk", "jump", "jumpTo", "veer", "look", "drop", "grab", "get", "free", "pop"]
 
-def abort():
-    print("NO")
-    sys.exit()
+"""Definición de CASOS"""
+
 
 def caso1(linea, variables):  # n
-    var = linea.split("(")
-    par = var[1].strip(")")
-    if len(var[1].split(",")) > 1:
+    var = linea.split("(")  # Se separa la linea por el caracter (
+    par = var[1].strip(")")  # Se quita el caracter ) de la linea
+    if len(var[1].split(",")) > 1:  # Si la longitud de la lista es mayor a 1
         abort()
-    elif par.isnumeric() == False:  # no es un número se verifica que es variable
+    elif par.isnumeric() is False:  # no es un número se verifica que es variable o parámetro
         isVar(variables, par)  # Si no aborta el proceso continúa
 
 
@@ -109,23 +106,28 @@ def caso3(linea):
 
 
 def is_dir(linea):
-    if linea in direcciones == False:
+    if linea in direcciones is False:
         abort()
 
 
 def is_orie(linea):
-    if linea in orientaciones == False:
+    if linea in orientaciones is False:
         abort()
 
 
 def isVar(lista, var):
-    if lista != None:
-        if var in lista == False:
-            if var in variables_globales == False:
+    if lista is not None:
+        if var in lista is False:
+            if var in variables_globales is False:
                 abort()
 
 
 """DEFINICIONES SECUNDARIAS"""
+
+
+def abort():  # se aborta el programa
+    print("NO")
+    sys.exit()
 
 
 def primeralproc(linea):
@@ -145,31 +147,21 @@ def primeralproc(linea):
     return variables_locales
 
 
-"""
-    indexProc, indexCorp = lines.index(l), lines.index(l)  # se obtiene el indice de la linea PROC
-    # se continua con el programa hasta encontrar una linea que inicie con CORP while
-    proc(l)
-    while lines[indexCorp] != "CORP":
-        indexCorp += 1
-"""
-
-
-
 """Estructuras de control"""
 
-#Maneja condicionales de if
+
+# Maneja condicionales de if
 def metodo_if(linea, variables_loc):
     lineac = linea.removeprefix("if").removesuffix("fi")
-    if linea.endswith("fi") == False:
+    if not linea.endswith("fi"):
         abort()
-    # ( canWalk ( west ,1) ) { walk ( west ,1) }
-    # ["canWalk ( west ,1)", "walk ( west ,1) }"]
     elif "else" in lineac:
         elseDef(lineac)
     else:
         ifNormal(lineac, variables_loc)
 
-#Maneja if sencillo (una condicion y un bloque)
+
+# Maneja if sencillo (una condicion y un bloque)
 def ifNormal(lineac, variables_loc):
     vara = lineac.split("{")
     if len(vara) < 2:
@@ -180,13 +172,14 @@ def ifNormal(lineac, variables_loc):
         else:
             cond = vara[0].removesuffix(")").removeprefix("(")
             condicion(cond)
-        if vara[1].endswith("}") == False:
+        if not vara[1].endswith("}"):
             abort()
         else:
             coman = vara[1].strip("}").split(";")
             comando(variables_loc, coman)
 
-#Maneja if en caso de haber un else
+
+# Maneja if en caso de haber un else
 def elseDef(linea, variables_loc):  # (else {})
     vari = linea.split("else")
     ifNormal(vari[0], variables_loc)
@@ -195,6 +188,7 @@ def elseDef(linea, variables_loc):  # (else {})
     else:
         limp = vari[1].removesuffix("}").removeprefix("{").split(";")
         comando(variables_loc, limp)
+
 
 # Maneja while
 def metodo_while(linea, variables_loc):
@@ -206,22 +200,26 @@ def metodo_while(linea, variables_loc):
     else:
         varn = varb.split("do")
         condicion(varn[0])
-        comando(variables_loc,varn[1].strip("{}".split(";")))
+        comando(variables_loc, varn[1].strip("{}".split(";")))
 
-#Maneja repeat
+
+# Maneja repeat
 def metodo_repeat(lon, variables_loc):
-    if lon.endswith("per") == False:
+    if not lon.endswith("per"):
         abort()
     else:
         perry = lon.removeprefix("repeatTimes").removesuffix("per").split("{")
-        if len(perry) <2:
+        if len(perry) < 2:
             abort()
         else:
-            if perry[0].isnumeric()== False:
+            if not perry[0].isnumeric():
                 isVar(perry[0])
-            comando(variables_loc,perry[1].strip("}"))
+            comando(variables_loc, perry[1].strip("}"))
+
 
 """Condicionales"""
+
+
 def condicion(linea):
     if linea.startswith("isfacing"):
         facing(linea)
@@ -236,6 +234,7 @@ def condicion(linea):
             eso = linea.remove("not").removesuffix(")").removeprefix("(")
             condicion(eso)
 
+
 def facing(lin):  # Solo tiene 1 var
     if "(" in lin and ")" in lin:
         var = lin.split("(")
@@ -247,18 +246,22 @@ def facing(lin):  # Solo tiene 1 var
     else:
         abort()
 
+
 """Comandos"""
+
+
 def comando(variables_loc, stringLista):
     for j in stringLista:
         if "(" in stringLista and ")" in stringLista:
-            proc= j.split("(")
+            proc = j.split("(")
             if j.startswith("walk"):
-                walk(j, None) 
-            elif j.startswith("jump") or j.startswith("drop") or j.startswith("grab") or j.startswith("get") or j.startswith("free") or caso1(j, None):
+                walk(j, None)
+            elif j.startswith("jump") or j.startswith("drop") or j.startswith("grab") or j.startswith(
+                    "get") or j.startswith("free") or caso1(j, None):
                 caso1(j, None)
             elif j.startswith("jumpTo"):
                 caso2(j, None)
-            elif j.startswith("veer")or j.startswith("look"):
+            elif j.startswith("veer") or j.startswith("look"):
                 caso3(j)
             elif j.startswith("if"):
                 metodo_if(j, variables_loc)
@@ -269,7 +272,7 @@ def comando(variables_loc, stringLista):
             elif proc[0] in dic_PROC.keys():
                 dicProc(j.removeprefix(proc[0]), proc[0])
         else:
-            #revisar si es una asignacion
+            # revisar si es una asignacion
             dummy = False
             for v in variables_globales:
                 if j.startswith(v):
@@ -284,40 +287,16 @@ def comando(variables_loc, stringLista):
 
 def dicProc(lin, nom):
     num = dic_PROC[nom]
-    if len(lin.split(","))!= num:
+    if len(lin.split(",")) != num:
         abort()
     else:
-        lini=lin.removeprefix("(").removesuffix(")").split(",")
+        lini = lin.removeprefix("(").removesuffix(")").split(",")
         for l in lini:
-            if l.isnumeric()==FALSE:
+            if not l.isnumeric():
                 abort()
-    
-
-
-# def comando(j):
-#     if "(" in j and ")" in j:
-#         if j.startswith("walk"):
-#             walk(j, None) 
-#         elif j.startswith("jump") or j.startswith("drop") or j.startswith("grab") or j.startswith("get") or j.startswith("free") or caso1(j, None):
-#             caso1(j, None)
-#         elif j.startswith("jumpTo"):
-#             caso2(j, None)
-#         elif j.startswith("veer")or j.startswith("look"):
-#             caso3(j)
-#     else:
-#         abort()
-
-# def controlStructure(j):
-#     if j.startswith("if"):
-#         metodo_if(j, None, None)
-#     elif j.startswith("while"):
-#         metodo_while(j, None, None)
-#     elif j.startswith("repeatTimes"):
-#         metodo_repeat(j, None)
 
 
 def walk(linea, lista):
-
     var = linea.split("(")
     par = var[1].strip(")").split(",")
     if len(var[1].split(",")) == 1:
@@ -327,7 +306,7 @@ def walk(linea, lista):
         if par[0] not in direcciones:
             if par[0] not in orientaciones:
                 abort()
-        elif par[1].isnumeric() == False:  # no es un número se verifica que es variable
+        elif not par[1].isnumeric():  # no es un número se verifica que es variable
             isVar(lista, par)
     elif len(var[1].split(",")) > 2:
         abort()
@@ -342,10 +321,11 @@ def valido(linea, lista):
         else:
             if paras[0] not in ins:
                 abort()
-            elif paras[1].isnumeric() == False:  # no es un número se verifica que es variable (nombre o variable)
+            elif not paras[1].isnumeric():  # no es un número se verifica que es variable (nombre o variable)
                 isVar(lista, paras)
     else:
         abort()
+
 
 def proc(bloque):
     variables_loc = primeralproc(bloque[0])
@@ -362,6 +342,7 @@ def proc(bloque):
     stringLista = string_bloque.strip("{}").split(";")
     comando(variables_loc, stringLista, nombre_proc)
 
+
 def bloque(bloq):
     string_bloque = ""
     for i in bloq:
@@ -371,19 +352,19 @@ def bloque(bloq):
         abort()
     else:
         stringLista = string_bloque.strip("{}").split(";")
-        if string_bloque.count(";")!=len(stringLista)-1:
+        if string_bloque.count(";") != len(stringLista) - 1:
             abort()
         else:
-            comando(None,stringLista)
+            comando(None, stringLista)
 
-            #[go(3,3)],[n=6],[putCB (2 ,1)]
+            # [go(3,3)],[n=6],[putCB (2 ,1)]
 
 
-#ENTRA UN STRING
+# ENTRA UN STRING
 def var(linea):
-    leni= linea.replace(" ","").removeprefix("VAR") 
-    #n, x, y; # se elimina el comando VAR
-    if leni.endswith(";") ==False:  # si el ultimo caracter no es un punto y coma
+    leni = linea.replace(" ", "").removeprefix("VAR")
+    # n, x, y; # se elimina el comando VAR
+    if leni.endswith(";") == False:  # si el ultimo caracter no es un punto y coma
         abort()
     else:
         varia = leni.removesufix(";").split(",")  # se separa la linea por comas
@@ -393,13 +374,12 @@ def var(linea):
             alphaNum(varia)
     return varia
 
-#revisa q sea alfanumerico
+
+# revisa q sea alfanumerico
 def alphaNum(lista):
     for f in lista:
-        if isalnum(f)==False or f[0].isalpha()==False:
+        if f.isalnum() == False or f[0].isalpha() == False:
             abort()
-
-  # se sale del programa
 
 
 ##############################################
@@ -408,76 +388,58 @@ def alphaNum(lista):
 
 with open("texto.txt", 'r') as f:  # se abre el archivo con el nombre texto.txt
     lines = f.readlines()  # se lee el archivo y se guarda en una lista
-
+    print(lines)
 string_bloque = ""
 for i in lines:
     string_bloque += i
 string_bloque.replace(" ", "")
 
-if string_bloque.count("{")%2>0 or string_bloque.count("}")%2>0 or string_bloque.count("(")%2>0 or string_bloque.count(")")%2>0: 
+if string_bloque.count("{") % 2 > 0 or string_bloque.count("}") % 2 > 0 or string_bloque.count(
+        "(") % 2 > 0 or string_bloque.count(")") % 2 > 0:
     # Revisa primera linea de programa
-    if string_bloque.startswith("PROG") and string_bloque.endswith("GORP"):  # si la primera linea no es PROG se termina el programa
-        i=1
-        while(lines[i]!=NULL and i<len(lines[1:-1])): # Se salta la primera linea y última linea del archivo
+    if string_bloque.startswith("PROG") and string_bloque.endswith(
+            "GORP"):  # si la primera linea no es PROG se termina el programa
+        i = 1
+        while lines[i] > 0 and i < len(lines[1:-1]):  # Se salta la primera linea y última linea del archivo
             """PARTE A: VAR"""
-            l=lines[i]
+            l = lines[i]
             if str(l).isspace() == False:  # si la linea no es un espacio se revisa si es una declaración de variables
                 if l.startswith("VAR"):  # si la linea inicia con VAR se revisa si es una declaración de variables
                     variables_globales.append(var(l))  # se guardan las variables en una lista
                 elif l.startswith("PROC"):
-                    indexProc=i
+                    indexProc = i
                     indexCorp = -1
-                    dummy=FALSE
-                    for i in lines[indexProc+1:-1]:
+                    dummy = False
+                    for i in lines[indexProc + 1:-1]:
                         if i.startswith("PROC"):
                             break
                         elif i.startswith("CORP"):
-                            dummy=True
-                            indexCorp= lines.index(i)
+                            dummy = True
+                            indexCorp = lines.index(i)
                             break
                     if dummy:
-                        proc(lines[indexProc:indexCorp+1])
+                        proc(lines[indexProc:indexCorp + 1])
                     else:
                         abort()
-                    i=indexCorp
+                    i = indexCorp
                 elif l.startswith("{"):
-                    indexcorchi=lines.index(l)
+                    indexcorchi = lines.index(l)
                     indexcorchf = -1
-                    dummy=FALSE
-                    for i in lines[indexcorchi+1:-1]:
+                    dummy = False
+                    for i in lines[indexcorchi + 1:-1]:
                         if i.startswith("{"):
                             break
                         elif i.startswith("}"):
-                            dummy=True
-                            indexcorchf= lines.index(i)
+                            dummy = True
+                            indexcorchf = lines.index(i)
                             break
                     if dummy:
-                        bloque(lines[indexcorchi:indexcorchf+1])
+                        bloque(lines[indexcorchi:indexcorchf + 1])
                     else:
                         abort()
-                    i=indexcorchf
+                    i = indexcorchf
                 else:
                     abort()
-            i+=1
+            i += 1
     else:
         abort()
-
-
-    # indexProc, indexCorp = lines.index(l), lines.index(l)  # se obtiene el indice de la linea PROC
-    # # se continua con el programa hasta encontrar una linea que inicie con CORP while
-    # proc(l)
-    # while lines[indexCorp] != "CORP":
-    #     indexCorp += 1
-# %%
-a = ["{hsdhoid}","(sdfh)jhjh", "kjhgj", "kffl"]
-
-for b in range(6):
-    print(b)
-    b=3
-
-
-
-
-
-
-# %%
