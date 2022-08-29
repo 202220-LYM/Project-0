@@ -868,6 +868,7 @@ if string_bloque.count("{") % 2 == 0 or string_bloque.count("}") % 2 == 0 or str
                         elif t.startswith("}"):
                             dummy = True
                             indexcorchf = j
+                        j += 1
                     if dummy:
                         bloque(lines[indexcorchi:indexcorchf + 1])
                     else:
