@@ -56,6 +56,7 @@
 # and variable names have been previously defined or in the case of functions, that they are the function’s
 # arguments. allow recursion
 
+
 """PROGRAMA"""
 
 import sys  # se importa sys para poder usar sys.exit()
@@ -132,9 +133,10 @@ def abort():  # se aborta el programa
     sys.exit()
 
 #funcionaa
-def primeralproc(linea):
+def primeralproc(linea1):
+    linea=linea1.replace("\n","")
     variables_locales = []
-    proc = linea.replace(" ", "").removeprefix("PROC").split("(")   # lista separada PROC y resto de (nota!!!!!!: CASO PROC CB)
+    proc = linea.replace(" ", "").replace("\n","").removeprefix("PROC").split("(")   # lista separada PROC y resto de (nota!!!!!!: CASO PROC CB)
     if len(proc) == 1 or linea.endswith(")") is False or len(proc[1].removesuffix(")").split(",")) - 1 != proc[1].count(",") or len(proc[0])==0:  # Se comprueba que los prámetros se encuentren dentro del paréntesis
         abort()
     else:
@@ -355,7 +357,7 @@ def proc(bloque):
     string_bloque = ""
     for i in bloque:
         string_bloque += i
-    sb=string_bloque.replace(" ", "")
+    sb=string_bloque.replace(" ", "").replace("\n","")
     if sb.startswith("{") is False or sb.endswith("}") is False:
         abort()
     stringLista = sb.strip("{}").split(";")
@@ -366,7 +368,7 @@ def bloque(bloq):
     string_bloque = ""
     for i in bloq:
         string_bloque += i
-    sb=string_bloque.replace(" ", "")
+    sb=string_bloque.replace(" ", "").replace("\n","")
     if sb.startswith("{") is False or sb.endswith("}") is False:
         abort()
     else:
@@ -381,7 +383,7 @@ def bloque(bloq):
 #ES PERFECTOOOOO
 # ENTRA UN STRING
 def var(linea):
-    leni = linea.replace(" ", "").removeprefix("VAR")
+    leni = linea.replace(" ", "").replace("\n","").removeprefix("VAR")
     # n, x, y; # se elimina el comando VAR
     if leni.endswith(";") is False:  # si el ultimo caracter no es un punto y coma
         abort()
@@ -405,55 +407,55 @@ def alphaNum(lista):
 """PROGRAMA PRINCIPAL"""
 ##############################################
 
-# with open("prueba.txt", 'r') as f:  # se abre el archivo con el nombre texto.txt
-#     lines = f.readlines()  # se lee el archivo y se guarda en una lista
-#     print(lines)
+with open("prueba.txt", 'r') as f:  # se abre el archivo con el nombre texto.txt
+    lines = f.readlines()  # se lee el archivo y se guarda en una lista
 
-lines= ['PROG\n', 'VAR n , x , y ;\n', 'PROC putCB (c , b)\n', '{\n', 'drop (c) ;\n', 'free (b) ;\n', 'walk (n)\n', '}\n', 'CORP\n', '\n', 'PROC goNorth ()\n', '{\n', '\n', 'while ( canWalk ( north ,1) ) do { walk ( north ,1) } od\n', '\n', '}\n', 'CORP\n', '\n', '\n', 'PROC goWest ()\n', '{\n', '\n', 'if ( canWalk ( west ,1) ) { walk ( west ,1) } fi\n', '\n', '}\n', 'CORP\n', '\n', '\n', '{\n', 'jumpTo(3 ,3) ;\n', 'n :=6;\n', 'putCB (2 ,1)\n', '\n', '\n', '\n', '\n', '}\n', '\n', 'GORP']
-
-string_bloque = ""
+string_bloque1 = ""
 for i in lines:
-    string_bloque += i
-string_bloque.replace(" ", "")
+    string_bloque1 += i
+string_bloque=string_bloque1.replace(" ", "").replace("\n","")
 
-if string_bloque.count("{") % 2 > 0 or string_bloque.count("}") % 2 > 0 or string_bloque.count(
-        "(") % 2 > 0 or string_bloque.count(")") % 2 > 0:
+if string_bloque.count("{") % 2 == 0 or string_bloque.count("}") % 2 == 0 or string_bloque.count( "(") % 2 == 0 or string_bloque.count(")") % 2 == 0:
     # Revisa primera linea de programa
     if string_bloque.startswith("PROG") and string_bloque.endswith("GORP"):  # si la primera linea no es PROG se termina el programa
         i = 1
-        while lines[i] > 0 and i < len(lines[1:-1]):  # Se salta la primera linea y última linea del archivo
+        while i < len(lines[1:-1]):  # Se salta la primera linea y última linea del archivo
             """PARTE A: VAR"""
-            l = lines[i]
-            if str(l).isspace() == False:  # si la linea no es un espacio se revisa si es una declaración de variables
+            l = lines[i].replace("\n","").replace(" ","")
+            if not l =="":  # si la linea no es un espacio se revisa si es una declaración de variables
                 if l.startswith("VAR"):  # si la linea inicia con VAR se revisa si es una declaración de variables
-                    variables_globales.append(var(l))  # se guardan las variables en una lista
+                    variables_globales.extend(var(l))  # se guardan las variables en una lista
                 elif l.startswith("PROC"):
                     indexProc = i
                     indexCorp = -1
                     dummy = False
-                    for i in lines[indexProc + 1:-1]:
-                        if i.startswith("PROC"):
+                    j=indexProc + 1
+                    while(j<len(lines[1:-1]) and dummy is False):
+                        t=lines[j].replace("\n","").replace(" ","")
+                        if t.startswith("PROC"):
                             break
-                        elif i.startswith("CORP"):
+                        elif t.startswith("CORP"):
                             dummy = True
-                            indexCorp = lines.index(i)
-                            break
+                            indexCorp = j
+                        j += 1
                     if dummy:
                         proc(lines[indexProc:indexCorp + 1])
                     else:
                         abort()
                     i = indexCorp
                 elif l.startswith("{"):
-                    indexcorchi = lines.index(l)
+                    indexcorchi = i########
                     indexcorchf = -1
                     dummy = False
-                    for i in lines[indexcorchi + 1:-1]:
-                        if i.startswith("{"):
+                    j=indexcorchi + 1
+                    while(j<len(lines[1:-1]) and dummy is False):
+                        t=lines[j].replace("\n","").replace(" ","")
+                        if t.startswith("{"):
                             break
-                        elif i.startswith("}"):
+                        elif t.startswith("}"):
                             dummy = True
-                            indexcorchf = lines.index(i)
-                            break
+                            indexcorchf = j
+                        j += 1
                     if dummy:
                         bloque(lines[indexcorchi:indexcorchf + 1])
                     else:
@@ -464,8 +466,9 @@ if string_bloque.count("{") % 2 > 0 or string_bloque.count("}") % 2 > 0 or strin
             i += 1
     else:
         abort()
+else: abort()
 
-    print("SI")
+print("SI")
 
 
 #%%
@@ -781,7 +784,7 @@ def bloque(bloq):
     string_bloque = ""
     for i in bloq:
         string_bloque += i
-    sb=string_bloque.replace(" ", "")
+    sb=string_bloque.replace(" ", "").replace("\n","")
     if sb.startswith("{") is False or sb.endswith("}") is False:
         abort()
     else:
